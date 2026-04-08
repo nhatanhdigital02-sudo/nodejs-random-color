@@ -1,6 +1,12 @@
 name: Build and Push Docker Image
 
 on:
+  push:
+    branches:
+      - master # hoặc thay đổi thành nhánh bạn muốn theo dõi
+  # pull_request:
+  #   branches:
+  #     - master
   workflow_dispatch:
     inputs:
       version:
@@ -16,8 +22,8 @@ on:
 
 env:
   AWS_REGION: ap-southeast-1
-  ECR_REGISTRY: 799227077423.dkr.ecr.ap-southeast-1.amazonaws.com
-  ECR_REPOSITORY: nodejs-random-color-0529
+  ECR_REGISTRY: 316502579592.dkr.ecr.ap-southeast-1.amazonaws.com
+  ECR_REPOSITORY: nodejs-random-color
 
 jobs:
   build-and-push:
@@ -26,8 +32,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        ref: refs/tags/${{ inputs.version }}
         
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
@@ -43,14 +47,14 @@ jobs:
       
     - name: Build Docker image
       run: |
-        docker build -t nodejs-random-color:${{ inputs.version }} .
+        docker build -t nodejs-random-color:latest .
         
     - name: Tag and push image to ECR
       run: |
-        docker tag nodejs-random-color:${{ inputs.version }} ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ inputs.version }}
-        docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ inputs.version }}
+        docker tag nodejs-random-color:latest ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest
+        docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest
         
     - name: Output image URI
       run: |
-        echo "IMAGE_URI=${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ inputs.version }}" >> $GITHUB_OUTPUT
+        echo "IMAGE_URI=${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest" >> $GITHUB_OUTPUT
       id: build-output
